@@ -1,6 +1,10 @@
 package taskScenario;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -19,9 +23,15 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 public class quantityPrice {
 	
 	public static WebDriver driver;
+	public static Properties config;
 	  @BeforeTest
-	  public void launchBrowser() throws InterruptedException
+	  public void launchBrowser() throws InterruptedException, IOException
 	  {
+		 
+		  config=new Properties();
+			FileInputStream input = new  FileInputStream("config.properties");
+			config.load(input);
+		  
 		  WebDriverManager.chromedriver().setup();
 	      ChromeOptions options = new ChromeOptions();
 	      driver=new ChromeDriver(options);
@@ -38,20 +48,22 @@ public class quantityPrice {
 	  @Test
 	  public void senario_1() throws InterruptedException
 	  {
+		  
 		  //login_cancel button
-		  driver.findElement(By.xpath("/html/body/div[2]/div/div/button")).click();
+		  driver.findElement(By.xpath(config.getProperty("login_cancel_button"))).click();
 		 
+	
+		  
 		  //Search Item
-		 WebElement search =  driver.findElement(By.name("q"));
-		 search.click();
-		 search.sendKeys("mi tv");
-		 WebElement search_icon = driver.findElement(By.xpath("/html/body/div[1]/div/div[1]/div[1]/div[2]/div[2]/form/div/button"));
-		 search_icon.click();
+		   driver.findElement(By.name(config.getProperty("search_field"))).sendKeys("mi tv");
+		 
+		   //Search Icon
+		   driver.findElement(By.xpath(config.getProperty("search_icon"))).click();
 		
 		driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS) ;
 		
 		 //Select Item
-		 driver.findElement(By.xpath("/html/body/div[1]/div/div[3]/div[1]/div[2]/div[2]/div/div/div/a/div[3]/div[1]")).click();
+		 driver.findElement(By.xpath(config.getProperty("select_item"))).click();
 		
 		 TimeUnit.SECONDS.sleep(10);
 		
@@ -61,28 +73,28 @@ public class quantityPrice {
 	     driver.switchTo().window(newTb.get(1));
 		
 		 //Price of the item
-		 String price = driver.findElement(By.xpath("/html/body/div[1]/div/div[3]/div[1]/div[2]/div[4]/div/label[1]/div[2]/div/div/div[2]")).getText();
+		 String price = driver.findElement(By.xpath(config.getProperty("item_price"))).getText();
 		
 		 String newStr = price.replaceAll("[₹]", "");
 		 System.out.println("Price of the Item is : "+newStr);
 		
 		 //Add to Cart
-		 driver.findElement(By.xpath("/html/body/div[1]/div/div[3]/div[1]/div[1]/div[2]/div/ul/li[1]/button")).click();
+		 driver.findElement(By.xpath(config.getProperty("addtoCart"))).click();
 		
 		 TimeUnit.SECONDS.sleep(10);
 		
-		 if(driver.findElements(By.xpath("/html/body/div[1]/div/div[2]/div/div/div[1]/div/div[3]/div/div[3]/div[1]/div/button[2]")).size()>0)
+		 if(driver.findElements(By.xpath(config.getProperty("addquantityIcon"))).size()>0)
 		 {
 			 System.out.println("Stock is Available");
 			 
 			 //Add quantity
-			 driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div/div/div[1]/div/div[3]/div/div[3]/div[1]/div/button[2]")).click();
+			 driver.findElement(By.xpath(config.getProperty("addquantityIcon"))).click();
 			
 			 TimeUnit.SECONDS.sleep(10);
 				
 			 
 			 //Price
-			 String total_price = driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div/div/div[2]/div[1]/div/div/div/div[4]/div/span/div/div/span")).getText();
+			 String total_price = driver.findElement(By.xpath(config.getProperty("price_value"))).getText();
 			 String tot_price = total_price.replaceAll("[₹]", "");
 			 int cart_price= Integer.parseInt(tot_price);
 			 System.out.println("Total Price of the Items is : "+cart_price);
@@ -99,6 +111,6 @@ public class quantityPrice {
 	  @AfterTest()
 	  public void quitBrowser()
 	  {
-//		  driver.quit();
+		  driver.quit();
 	  }
 }

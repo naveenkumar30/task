@@ -1,6 +1,10 @@
 package taskScenario;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -9,6 +13,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -18,21 +23,25 @@ public class compareSite {
 	
 	
 	public static WebDriver driver;
+	public static Properties config;
 	
 	@BeforeTest
-	public void launchBrowser()
+	public void launchBrowser() throws IOException
 	{
 		 WebDriverManager.chromedriver().setup();
 	      ChromeOptions options = new ChromeOptions();
 	      driver=new ChromeDriver(options);
 		 
+	      config=new Properties();
+			FileInputStream input = new  FileInputStream("config.properties");
+			config.load(input);
 	}
 
   @Test
   public void amazon() throws InterruptedException 
   {
-	  
-	  
+	
+	   
 	  //Flipkart
 	  driver.navigate().to("https://www.flipkart.com/");
 		 
@@ -40,19 +49,17 @@ public class compareSite {
 	  driver.manage().window().maximize();
 	 
 	  //login_cancel button
-	  driver.findElement(By.xpath("/html/body/div[2]/div/div/button")).click();
+	  driver.findElement(By.xpath(config.getProperty("login_cancel_button"))).click();
 	 
 	  //Search Item
-	 WebElement flipkart_search =  driver.findElement(By.name("q"));
-	 flipkart_search.click();
-	 flipkart_search.sendKeys("mi tv");
-	 WebElement flipkart_search_icon = driver.findElement(By.xpath("/html/body/div[1]/div/div[1]/div[1]/div[2]/div[2]/form/div/button"));
-	 flipkart_search_icon.click();
+	 driver.findElement(By.name(config.getProperty("search_field"))).sendKeys("mi tv");
+	 //Search icon
+	driver.findElement(By.xpath(config.getProperty("flipkart_search_icon"))).click();
 	
 	 driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS) ;
 	
 	 //Select Item
-	 driver.findElement(By.xpath("/html/body/div[1]/div/div[3]/div[1]/div[2]/div[2]/div/div/div/a/div[3]/div[1]")).click();
+	 driver.findElement(By.xpath(config.getProperty("select_item"))).click();
 	
 	 TimeUnit.SECONDS.sleep(10);
 	
@@ -65,16 +72,16 @@ public class compareSite {
 
 	
 	 //Price of the item
-	 String fk_price = driver.findElement(By.xpath("/html/body/div[1]/div/div[3]/div[1]/div[2]/div[4]/div/label[1]/div[2]/div/div/div[2]")).getText();
+	 String fk_price = driver.findElement(By.xpath(config.getProperty("fp_price"))).getText();
 	
 	 String flipkart_price = fk_price.replaceAll("[₹,]", "");
 	 System.out.println("Price of the Item in List : "+flipkart_price);
 	
 	 //Add to Cart
-	 driver.findElement(By.xpath("/html/body/div[1]/div/div[3]/div[1]/div[1]/div[2]/div/ul/li[1]/button")).click();
+	 driver.findElement(By.xpath(config.getProperty("addtoCart"))).click();
 	
 	 //Price
-	 String total_price = driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div/div/div[2]/div[1]/div/div/div/div[4]/div/span/div/div/span")).getText();
+	 String total_price = driver.findElement(By.xpath(config.getProperty("totalPrice"))).getText();
 	 String flipkart_total_price = total_price.replaceAll("[₹,]", "");
 	 int final_price = Integer.parseInt(flipkart_total_price);
 	 System.out.println("Price of the Item in Cart : "+final_price);
@@ -95,28 +102,25 @@ public class compareSite {
 	 
 	  
 	  //Search field
-	 WebElement amazon_search= driver.findElement(By.id("twotabsearchtextbox"));
-	 amazon_search.click();
-	 amazon_search.sendKeys("mi tv");
+	  driver.findElement(By.id(config.getProperty("amazon_search"))).sendKeys("mi tv");
 	 
 	 //search icon
-	 driver.findElement(By.id("nav-search-submit-button")).click();
+	 driver.findElement(By.id(config.getProperty("amazon_search_icon"))).click();
 	 
 	 TimeUnit.SECONDS.sleep(10);
 	 
 	  //Select item
-	 WebElement element = driver.findElement(By.xpath("//*[contains(text(),'MI 80 cm (32 inches) 5A Series HD Ready Smart Android LED TV L32M7-5AIN (Black)')]"));
+	 WebElement element = driver.findElement(By.xpath(config.getProperty("text")));
 
 	 Actions actions = new Actions(driver);
 
 	 actions.moveToElement(element).click().perform();
-//	 driver.findElement(By.xpath("//*[contains(text(),'MI 80 cm (32 inches) 5A Series HD Ready Smart Android LED TV L32M7-5AIN (Black)')]")).click();
 	 
 	 TimeUnit.SECONDS.sleep(10);
 	 
      
      //Print price
-     String amazon_price=driver.findElement(By.xpath("/html/body/div[2]/div[2]/div[5]/div[4]/div[4]/div[10]/div[3]/div[1]/span[2]/span[2]/span[2]")).getText();
+     String amazon_price=driver.findElement(By.xpath(config.getProperty("amazonPrice"))).getText();
     
      String ama_price = amazon_price.replaceAll("[₹,]", "");
      System.out.println("Price of the Item in List : "+ama_price);
@@ -125,13 +129,13 @@ public class compareSite {
 
      
      //Add cart
-     driver.findElement(By.name("submit.add-to-cart")).click();
+     driver.findElement(By.name(config.getProperty("amazonToCart"))).click();
      TimeUnit.SECONDS.sleep(5);
      //Cart
-     driver.findElement(By.xpath("//*[@id=\"attach-sidesheet-view-cart-button\"]/span/input")).click();
+     driver.findElement(By.xpath(config.getProperty("cartButton"))).click();
      TimeUnit.SECONDS.sleep(5);
      //cart price
-     String amazon_cart_price=driver.findElement(By.xpath("/html/body/div[1]/div[2]/div[3]/div[4]/div/div[1]/div[1]/div/form/div/div[3]/div[1]/span[2]/span")).getText();
+     String amazon_cart_price=driver.findElement(By.xpath(config.getProperty("amazonCartPrice"))).getText();
      String cart_price = amazon_cart_price.replaceAll("[₹,]", "");
      double value = Double.parseDouble(cart_price);
      int amazon_final_price = (int)value;
@@ -155,5 +159,10 @@ public class compareSite {
 	 }
 	 
      
+  }
+  @AfterTest()
+  public void quitBrower()
+  {
+	  driver.quit();
   }
 }
